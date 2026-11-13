@@ -118,11 +118,18 @@ def forecast_market(prices, horizon):
     rows = []
     for h in range(1, horizon + 1):
         root_h = math.sqrt(h)
-        ld_row = [x + z * s * root_h for z in Z]
+        ld_row = [clamp01(x + z * s * root_h) for z in Z]
         if curves:
             qs = interp_curve(curves, h)
             c = qs[2]
-            emp_row = [x + (q - c) for q in qs]
+            emp_row = []
+            prev = 0.0
+            for q in qs:
+                v = clamp01(x + (q - c))
+                if v < prev:
+                    v = prev
+                emp_row.append(v)
+                prev = v
         else:
             emp_row = ld_row
         row = []
